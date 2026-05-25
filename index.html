@@ -473,6 +473,9 @@
   <div class="nav-item" onclick="goto('tavsiyeler')">
     <span class="icon">✦</span> Yapay Zeka Tavsiyeleri
   </div>
+  <div class="nav-item" onclick="goto('maliyet')">
+    <span class="icon">🖨</span> Maliyet Hesabı
+  </div>
 </nav>
 
 <!-- MAIN -->
@@ -1091,6 +1094,270 @@
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════ MALİYET HESABI ═══ -->
+    <div class="panel" id="panel-maliyet">
+
+      <!-- Sekme Başlıkları -->
+      <div style="display:flex;gap:0;border-bottom:2px solid var(--ink);margin-bottom:24px;">
+        <button id="sekme-teklif" onclick="maliyetSekme('teklif')" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:10px 24px;background:var(--ink);color:var(--paper);border:none;cursor:pointer;">🖨 Baskı Hizmet Teklifi</button>
+        <button id="sekme-shamil" onclick="maliyetSekme('shamil')" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:10px 24px;background:var(--aged);color:var(--slate);border:none;cursor:pointer;">📗 Şamil Yayın Maliyeti</button>
+      </div>
+
+      <!-- ── TEKLİF SEKME ── -->
+      <div id="sekme-icerik-teklif">
+        <div class="two-col" style="align-items:start;margin-bottom:24px;">
+
+          <!-- SOL: Teknik Bilgiler -->
+          <div class="box">
+            <div class="box-title">Kitap Özellikleri</div>
+            <div class="form-row">
+              <div class="form-group"><label>Müşteri Adı</label><input type="text" id="t-musteri" placeholder="Müşteri / Yayınevi adı"></div>
+              <div class="form-group"><label>Kitap / İş Adı</label><input type="text" id="t-isad" placeholder="Kitap adı"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Sayfa Sayısı</label><input type="number" id="t-sayfa" placeholder="256" oninput="teklifHesapla()"></div>
+              <div class="form-group"><label>Baskı Adedi</label><input type="number" id="t-adet" placeholder="1000" oninput="teklifHesapla()"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Ebat</label>
+                <select id="t-ebat" onchange="teklifHesapla()">
+                  <option value="57x88">135×195 mm</option>
+                  <option value="68x100">165×240 mm</option>
+                  <option value="70x100">165×240 mm (Büyük)</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Gramaj</label>
+                <select id="t-gramaj" onchange="teklifHesapla()">
+                  <option value="60">60 gr. Holmen</option>
+                  <option value="70">70 gr. Holmen</option>
+                  <option value="70ivory">70 gr. Ivory Şamua</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>İç Baskı</label>
+                <select id="t-icbaski" onchange="teklifHesapla()">
+                  <option value="sb">Siyah-Beyaz</option>
+                  <option value="4r">4 Renk</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Cilt</label>
+                <select id="t-cilt" onchange="teklifHesapla()">
+                  <option value="karton">Karton Kapak</option>
+                  <option value="sert">Sert Kapak (Ciltli)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Selefon</label>
+                <select id="t-seleofon" onchange="teklifHesapla()">
+                  <option value="yok">Yok</option>
+                  <option value="mat">Mat Selefon</option>
+                  <option value="parlak">Parlak Selefon</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Lak / Yaldız</label>
+                <select id="t-lak" onchange="teklifHesapla()">
+                  <option value="yok">Yok</option>
+                  <option value="lak">Lak</option>
+                  <option value="yaldiz">Yaldız</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SAĞ: Kalem Kalem Fiyat Girişi -->
+          <div class="box">
+            <div class="box-title">Kalem Bazlı Fiyatlandırma</div>
+            <div style="font-size:11px;color:var(--light-slate);margin-bottom:12px;font-family:'IBM Plex Mono',monospace;">Matbaa maliyeti → Müşteri fiyatı (her kalem ayrı)</div>
+
+            <div id="t-teknik-bilgi" style="background:var(--aged);padding:10px;margin-bottom:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:2;color:var(--slate);"></div>
+
+            <!-- Her kalem: maliyet / müşteri fiyatı -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--light-slate);letter-spacing:1px;">KALEM</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--rust);letter-spacing:1px;">MALİYET</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--forest);letter-spacing:1px;">MÜŞTERİ FİYATI</div>
+            </div>
+
+            <div id="t-kalemler">
+              <!-- JS ile doldurulur -->
+            </div>
+
+            <div style="border-top:2px solid var(--ink);margin-top:14px;padding-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:center;">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;">TOPLAM</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:var(--rust);" id="t-toplam-maliyet">₺0</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:var(--forest);" id="t-toplam-musteri">₺0</div>
+            </div>
+            <div style="background:var(--gold);color:white;padding:10px 14px;margin-top:10px;display:flex;justify-content:space-between;">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;">KÂR</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;" id="t-kar">₺0 (%0)</span>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button class="btn btn-primary" style="flex:1;" onclick="teklifKaydet()">💾 Kaydet</button>
+              <button class="btn btn-ghost" onclick="teklifTemizle()">Temizle</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teklif Geçmişi -->
+        <div class="section-header">
+          <div class="section-title">Teklif Geçmişi</div>
+          <button class="btn btn-ghost" onclick="teklifGecmisiTemizle()">Temizle</button>
+        </div>
+        <table>
+          <thead><tr><th>Müşteri</th><th>Kitap</th><th>Sayfa</th><th>Adet</th><th>Maliyet</th><th>Teklif</th><th>Kâr</th><th>Tarih</th><th></th></tr></thead>
+          <tbody id="teklif-gecmis-tbody">
+            <tr><td colspan="9" style="text-align:center;color:var(--light-slate);font-style:italic;padding:20px;">Henüz teklif kaydedilmedi.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── ŞAMİL MALİYET SEKME ── -->
+      <div id="sekme-icerik-shamil" style="display:none;">
+        <div class="two-col" style="align-items:start;margin-bottom:24px;">
+
+          <!-- SOL: Form -->
+          <div class="box">
+            <div class="box-title">Kitap Özellikleri</div>
+            <div class="form-row">
+              <div class="form-group"><label>Kitap Adı</label><input type="text" id="s-kitap" placeholder="Kitap adı"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Sayfa Sayısı</label><input type="number" id="s-sayfa" placeholder="256" oninput="shamilHesapla()"></div>
+              <div class="form-group"><label>Baskı Adedi</label><input type="number" id="s-adet" placeholder="1000" oninput="shamilHesapla()"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Ebat X (cm)</label><input type="number" id="s-ebatx" value="57" oninput="shamilHesapla()"></div>
+              <div class="form-group"><label>Ebat Y (cm)</label><input type="number" id="s-ebaty" value="88" oninput="shamilHesapla()"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Gramaj</label>
+                <select id="s-gramaj" onchange="shamilHesapla()">
+                  <option value="60">60 gr.</option>
+                  <option value="70">70 gr.</option>
+                  <option value="52">52 gr.</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Döviz Kuru (₺/€)</label><input type="number" id="s-kur" value="40" oninput="shamilHesapla()"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>İç Baskı</label>
+                <select id="s-icbaski" onchange="shamilHesapla()">
+                  <option value="sb">Siyah-Beyaz</option>
+                  <option value="4r">4 Renk</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Cilt</label>
+                <select id="s-cilt" onchange="shamilHesapla()">
+                  <option value="karton">Karton Kapak</option>
+                  <option value="sert">Sert Kapak (Ciltli)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sep" style="margin:12px 0;"></div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--slate);margin-bottom:10px;">KALEMLERİ MANUEL GİR (₺)</div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="form-group"><label>İç Kağıt (€/top)</label><input type="number" id="s-ickagit-euro" placeholder="900" oninput="shamilHesapla()"></div>
+              <div class="form-group"><label>Kapak Kağıt (₺)</label><input type="number" id="s-kapakkagit" placeholder="5000" oninput="shamilHesapla()"></div>
+              <div class="form-group"><label>İç Baskı / Forma (₺)</label><input type="number" id="s-icbaski-fiyat" placeholder="650" oninput="shamilHesapla()"></div>
+              <div class="form-group"><label>Kapak Baskı (₺)</label><input type="number" id="s-kapakbaski" placeholder="2500" oninput="shamilHesapla()"></div>
+              <div class="form-group"><label>Selefon (₺)</label><input type="number" id="s-seleofon" placeholder="0" oninput="shamilHesapla()"></div>
+              <div class="form-group"><label>Lak / Yaldız (₺)</label><input type="number" id="s-lak" placeholder="0" oninput="shamilHesapla()"></div>
+              <div class="form-group"><label>Yan Kağıt (₺)</label><input type="number" id="s-yankagit" placeholder="0" oninput="shamilHesapla()"></div>
+              <div class="form-group"><label>Cilt + Harman (₺)</label><input type="number" id="s-ciltfiyat" placeholder="5600" oninput="shamilHesapla()"></div>
+            </div>
+
+            <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="shamilKaydet()">💾 Hesapla ve Kaydet</button>
+          </div>
+
+          <!-- SAĞ: Sonuç -->
+          <div>
+            <div class="box" style="margin-bottom:16px;">
+              <div class="box-title">Maliyet Özeti</div>
+              <div id="s-sonuc-bos" style="font-size:13px;color:var(--light-slate);font-style:italic;">Formu doldurun.</div>
+              <div id="s-sonuc" style="display:none;">
+
+                <div id="s-teknik" style="background:var(--aged);padding:10px;margin-bottom:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:2;color:var(--slate);"></div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+                  <div style="padding:10px;background:var(--aged);border:1px solid var(--border);">
+                    <div class="stat-label">İç Kağıt</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;" id="sr-ickagit">—</div>
+                  </div>
+                  <div style="padding:10px;background:var(--aged);border:1px solid var(--border);">
+                    <div class="stat-label">Kapak Kağıt</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;" id="sr-kapak">—</div>
+                  </div>
+                  <div style="padding:10px;background:var(--aged);border:1px solid var(--border);">
+                    <div class="stat-label">İç Baskı</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;" id="sr-icbaski">—</div>
+                  </div>
+                  <div style="padding:10px;background:var(--aged);border:1px solid var(--border);">
+                    <div class="stat-label">Kapak Baskı</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;" id="sr-kapakbaski">—</div>
+                  </div>
+                  <div style="padding:10px;background:var(--aged);border:1px solid var(--border);">
+                    <div class="stat-label">Cilt + Harman</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;" id="sr-cilt">—</div>
+                  </div>
+                  <div style="padding:10px;background:var(--aged);border:1px solid var(--border);">
+                    <div class="stat-label">Fin. (Selefon/Lak)</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;" id="sr-fin">—</div>
+                  </div>
+                </div>
+
+                <div style="background:var(--ink);color:var(--paper);padding:16px;margin-bottom:12px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:#aaa;">TOPLAM MALİYET</div>
+                      <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;" id="sr-toplam">—</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:#aaa;">ADET BAŞINA</div>
+                      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold);" id="sr-adet">—</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--slate);margin-bottom:8px;">ÖNERİLEN SATIŞ FİYATI (KDV HARİÇ)</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                  <div style="padding:10px;background:#f0fdf4;border:1px solid #86efac;text-align:center;">
+                    <div style="font-size:10px;color:#166534;font-family:'IBM Plex Mono',monospace;">%40 KAR</div>
+                    <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#166534;" id="sr-f40">—</div>
+                  </div>
+                  <div style="padding:10px;background:#fffbeb;border:1px solid #fcd34d;text-align:center;">
+                    <div style="font-size:10px;color:#92400e;font-family:'IBM Plex Mono',monospace;">%50 KAR</div>
+                    <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#92400e;" id="sr-f50">—</div>
+                  </div>
+                  <div style="padding:10px;background:#fff1f2;border:1px solid #fca5a5;text-align:center;">
+                    <div style="font-size:10px;color:#991b1b;font-family:'IBM Plex Mono',monospace;">%60 KAR</div>
+                    <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#991b1b;" id="sr-f60">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Şamil Maliyet Geçmişi -->
+        <div class="section-header">
+          <div class="section-title">Maliyet Geçmişi</div>
+          <button class="btn btn-ghost" onclick="shamilGecmisiTemizle()">Temizle</button>
+        </div>
+        <table>
+          <thead><tr><th>Kitap</th><th>Sayfa</th><th>Adet</th><th>Toplam</th><th>Adet Başına</th><th>%50 Satış</th><th>Tarih</th><th></th></tr></thead>
+          <tbody id="shamil-gecmis-tbody">
+            <tr><td colspan="8" style="text-align:center;color:var(--light-slate);font-style:italic;padding:20px;">Henüz hesaplama kaydedilmedi.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -1379,7 +1646,8 @@ function kaydetMuhasebe() { lsSave('yn_muhasebe', muhIslemler); }
 const titles = {
   dashboard: 'Genel Bakış', projeler: 'Projeler', yazarlar: 'Yazarlar',
   takvim: 'Yayın Takvimi', muhasebe: 'Muhasebe', sozlesmeler: 'Sözleşmeler',
-  sevkiyat: 'Sevkiyat', pazarlama: 'Pazarlama', tavsiyeler: 'Yapay Zeka Tavsiyeleri'
+  sevkiyat: 'Sevkiyat', pazarlama: 'Pazarlama', tavsiyeler: 'Yapay Zeka Tavsiyeleri',
+  maliyet: 'Baskı Maliyet Hesabı'
 };
 
 function goto(id) {
@@ -1888,7 +2156,277 @@ function renderGantt() {
 }
 renderGantt();
 
-// ── MODAL ──
+// ── MALİYET / TEKLİF ──
+
+let teklifGecmisi = lsGet('yn_teklif', []);
+let shamilGecmisi = lsGet('yn_shamil', []);
+function kaydetTeklif() { lsSave('yn_teklif', teklifGecmisi); }
+function kaydetShamil() { lsSave('yn_shamil', shamilGecmisi); }
+
+// Sekme geçişi
+function maliyetSekme(s) {
+  document.getElementById('sekme-icerik-teklif').style.display = s === 'teklif' ? 'block' : 'none';
+  document.getElementById('sekme-icerik-shamil').style.display = s === 'shamil' ? 'block' : 'none';
+  document.getElementById('sekme-teklif').style.background = s === 'teklif' ? 'var(--ink)' : 'var(--aged)';
+  document.getElementById('sekme-teklif').style.color = s === 'teklif' ? 'var(--paper)' : 'var(--slate)';
+  document.getElementById('sekme-shamil').style.background = s === 'shamil' ? 'var(--ink)' : 'var(--aged)';
+  document.getElementById('sekme-shamil').style.color = s === 'shamil' ? 'var(--paper)' : 'var(--slate)';
+}
+
+// Excel formülünden: Forma, Top, Yuvarla, KG hesabı
+function hesaplaTeknikalBilgi(sayfa, ebatX, ebatY, gramaj, adet) {
+  const forma = sayfa / 16;
+  const top = forma * 1.1;
+  const yuvarla = Math.ceil(top);
+  const kg = yuvarla * (ebatX * ebatY * 2 * gramaj) / 1000000;
+  return { forma, top, yuvarla, kg };
+}
+
+// ── TEKLİF HESAPLAMA ──
+// Kalem listesi: id, label, birim, maliyet varsayılan
+const KALEMLER = [
+  { id: 'kag',  label: 'İç Kağıt (€/top)',       birim: '€', m: 900,  c: 1100 },
+  { id: 'kap',  label: 'Kapak Kağıt (₺)',         birim: '₺', m: 5000, c: 6000 },
+  { id: 'icb',  label: 'İç Baskı / Forma (₺)',    birim: '₺', m: 650,  c: 850  },
+  { id: 'kpb',  label: 'Kapak Baskı (₺)',         birim: '₺', m: 2500, c: 3000 },
+  { id: 'sel',  label: 'Selefon (₺)',              birim: '₺', m: 0,    c: 0    },
+  { id: 'lak',  label: 'Lak / Yaldız (₺)',         birim: '₺', m: 0,    c: 0    },
+  { id: 'cil',  label: 'Cilt + Harman (₺)',        birim: '₺', m: 5600, c: 7000 },
+];
+
+function teklifKalemleriOlustur() {
+  const div = document.getElementById('t-kalemler');
+  if (!div) return;
+  div.innerHTML = KALEMLER.map(k => `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px;align-items:center;">
+      <div style="font-size:12px;color:var(--slate);">${k.label}</div>
+      <input type="number" id="tk-m-${k.id}" value="${k.m}" oninput="teklifToplamGuncelle()"
+        style="font-size:12px;padding:5px 8px;border:1px solid var(--border);background:var(--paper);color:var(--rust);font-family:'IBM Plex Mono',monospace;">
+      <input type="number" id="tk-c-${k.id}" value="${k.c}" oninput="teklifToplamGuncelle()"
+        style="font-size:12px;padding:5px 8px;border:1px solid var(--border);background:var(--paper);color:var(--forest);font-family:'IBM Plex Mono',monospace;">
+    </div>
+  `).join('');
+  teklifHesapla();
+}
+
+function teklifHesapla() {
+  const sayfa = parseInt(document.getElementById('t-sayfa')?.value) || 0;
+  const adet  = parseInt(document.getElementById('t-adet')?.value) || 0;
+  const ebat  = document.getElementById('t-ebat')?.value || '57x88';
+  const [ex, ey] = ebat.split('x').map(Number);
+  const kur = 40;
+
+  if (!sayfa || !adet) { teklifToplamGuncelle(); return; }
+
+  const { forma, top, yuvarla, kg } = hesaplaTeknikalBilgi(sayfa, ex, ey, 70, adet);
+
+  // Teknik bilgi güncelle
+  const teknik = document.getElementById('t-teknik-bilgi');
+  if (teknik) teknik.innerHTML =
+    `FORMA: ${forma} &nbsp;|&nbsp; TOP: ${top.toFixed(2)} &nbsp;|&nbsp; YUVARLA: ${yuvarla} &nbsp;|&nbsp; KG ≈ ${kg.toFixed(1)}`;
+
+  // Kağıt için top sayısını kağıt alanına yansıt (bilgi amaçlı)
+  teklifToplamGuncelle();
+}
+
+function teklifToplamGuncelle() {
+  let topMaliyet = 0, topMusteri = 0;
+  KALEMLER.forEach(k => {
+    const m = parseFloat(document.getElementById(`tk-m-${k.id}`)?.value) || 0;
+    const c = parseFloat(document.getElementById(`tk-c-${k.id}`)?.value) || 0;
+    // Kağıt kalemi için top sayısıyla çarp
+    const sayfa = parseInt(document.getElementById('t-sayfa')?.value) || 0;
+    const adet  = parseInt(document.getElementById('t-adet')?.value) || 0;
+    const ebat  = document.getElementById('t-ebat')?.value || '57x88';
+    const [ex, ey] = ebat.split('x').map(Number);
+    const kur = parseFloat(document.getElementById('s-kur')?.value) || 40;
+    let mTl = m, cTl = c;
+    if (k.id === 'kag' && sayfa && adet) {
+      const { yuvarla } = hesaplaTeknikalBilgi(sayfa, ex, ey, 70, adet);
+      mTl = m * yuvarla * kur;
+      cTl = c * yuvarla * kur;
+    } else if (k.id === 'icb' && sayfa) {
+      const forma = sayfa / 16;
+      mTl = m * forma;
+      cTl = c * forma;
+    }
+    topMaliyet += mTl;
+    topMusteri += cTl;
+  });
+
+  const kar = topMusteri - topMaliyet;
+  const karYuzde = topMaliyet > 0 ? ((kar / topMaliyet) * 100).toFixed(1) : 0;
+
+  const fmt = v => '₺' + Math.round(v).toLocaleString('tr-TR');
+  const el = id => document.getElementById(id);
+  if (el('t-toplam-maliyet')) el('t-toplam-maliyet').textContent = fmt(topMaliyet);
+  if (el('t-toplam-musteri')) el('t-toplam-musteri').textContent = fmt(topMusteri);
+  if (el('t-kar')) el('t-kar').textContent = fmt(kar) + ' (%' + karYuzde + ')';
+}
+
+function teklifKaydet() {
+  const musteri = document.getElementById('t-musteri').value.trim();
+  const isAd   = document.getElementById('t-isad').value.trim();
+  const sayfa  = document.getElementById('t-sayfa').value;
+  const adet   = document.getElementById('t-adet').value;
+  if (!musteri || !sayfa || !adet) { toast('Müşteri, sayfa ve adet zorunlu'); return; }
+
+  let topMaliyet = 0, topMusteri = 0;
+  const kalemDetay = [];
+  KALEMLER.forEach(k => {
+    const m = parseFloat(document.getElementById(`tk-m-${k.id}`)?.value) || 0;
+    const c = parseFloat(document.getElementById(`tk-c-${k.id}`)?.value) || 0;
+    kalemDetay.push({ label: k.label, maliyet: m, musteri: c });
+    topMaliyet += m; topMusteri += c;
+  });
+
+  const kayit = {
+    id: Date.now(),
+    musteri, isAd, sayfa, adet,
+    cilt: document.getElementById('t-cilt').value,
+    topMaliyet: Math.round(topMaliyet),
+    topMusteri: Math.round(topMusteri),
+    kar: Math.round(topMusteri - topMaliyet),
+    kalemler: kalemDetay,
+    tarih: new Date().toLocaleDateString('tr-TR')
+  };
+  teklifGecmisi.unshift(kayit);
+  kaydetTeklif();
+  renderTeklifGecmisi();
+  toast('Teklif kaydedildi ✓');
+}
+
+function teklifTemizle() {
+  ['t-musteri','t-isad','t-sayfa','t-adet'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('t-teknik-bilgi').textContent = '';
+  teklifToplamGuncelle();
+}
+
+function renderTeklifGecmisi() {
+  const tbody = document.getElementById('teklif-gecmis-tbody');
+  if (!tbody) return;
+  if (!teklifGecmisi.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--light-slate);font-style:italic;padding:20px;">Henüz teklif kaydedilmedi.</td></tr>';
+    return;
+  }
+  const fmt = v => '₺' + v.toLocaleString('tr-TR');
+  tbody.innerHTML = teklifGecmisi.map((t, i) => `<tr>
+    <td>${t.musteri}</td>
+    <td>${t.isAd || '—'}</td>
+    <td>${t.sayfa}</td>
+    <td>${t.adet}</td>
+    <td style="color:var(--rust);font-family:'IBM Plex Mono',monospace;">${fmt(t.topMaliyet)}</td>
+    <td style="color:var(--forest);font-family:'IBM Plex Mono',monospace;">${fmt(t.topMusteri)}</td>
+    <td style="color:var(--gold);font-family:'IBM Plex Mono',monospace;">${fmt(t.kar)}</td>
+    <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">${t.tarih}</td>
+    <td><button class="btn" style="font-size:10px;padding:2px 7px;background:var(--rust);color:white;border:none;" onclick="teklifSil(${i})">Sil</button></td>
+  </tr>`).join('');
+}
+
+function teklifSil(i) { teklifGecmisi.splice(i,1); kaydetTeklif(); renderTeklifGecmisi(); toast('Silindi'); }
+function teklifGecmisiTemizle() { if(confirm('Tüm teklif geçmişi silinsin mi?')) { teklifGecmisi.length=0; kaydetTeklif(); renderTeklifGecmisi(); } }
+
+// ── ŞAMİL MALİYET HESAPLAMA ──
+function shamilHesapla() {
+  const sayfa  = parseInt(document.getElementById('s-sayfa')?.value) || 0;
+  const adet   = parseInt(document.getElementById('s-adet')?.value) || 0;
+  const ex     = parseInt(document.getElementById('s-ebatx')?.value) || 57;
+  const ey     = parseInt(document.getElementById('s-ebaty')?.value) || 88;
+  const gramaj = parseInt(document.getElementById('s-gramaj')?.value) || 60;
+  const kur    = parseFloat(document.getElementById('s-kur')?.value) || 40;
+
+  if (!sayfa || !adet) return;
+
+  const { forma, top, yuvarla, kg } = hesaplaTeknikalBilgi(sayfa, ex, ey, gramaj, adet);
+
+  // Teknik bilgi
+  const teknik = document.getElementById('s-teknik');
+  if (teknik) teknik.innerHTML =
+    `FORMA: ${forma} &nbsp;|&nbsp; TOP: ${top.toFixed(2)} &nbsp;|&nbsp; YUVARLA: ${yuvarla} &nbsp;|&nbsp; KG: ${kg.toFixed(2)} &nbsp;|&nbsp; KDV DAHİL €: ${(kg * 1.43).toFixed(2)}`;
+
+  // Kalem hesapları
+  const kagitEuro = parseFloat(document.getElementById('s-ickagit-euro')?.value) || 0;
+  const icKagit   = kagitEuro * yuvarla * kur;
+  const kapKagit  = parseFloat(document.getElementById('s-kapakkagit')?.value) || 0;
+  const icbFiyat  = parseFloat(document.getElementById('s-icbaski-fiyat')?.value) || 0;
+  const icBaski   = icbFiyat * forma;
+  const kapBaski  = parseFloat(document.getElementById('s-kapakbaski')?.value) || 0;
+  const seleofon  = parseFloat(document.getElementById('s-seleofon')?.value) || 0;
+  const lak       = parseFloat(document.getElementById('s-lak')?.value) || 0;
+  const yanKagit  = parseFloat(document.getElementById('s-yankagit')?.value) || 0;
+  const cilt      = parseFloat(document.getElementById('s-ciltfiyat')?.value) || 0;
+  const fin       = seleofon + lak;
+
+  const toplam    = icKagit + kapKagit + icBaski + kapBaski + fin + yanKagit + cilt;
+  const adetBasi  = toplam / adet;
+
+  const fmt = v => '₺' + Math.round(v).toLocaleString('tr-TR');
+
+  // Sonuçları göster
+  document.getElementById('s-sonuc-bos').style.display = 'none';
+  document.getElementById('s-sonuc').style.display = 'block';
+  document.getElementById('sr-ickagit').textContent = fmt(icKagit);
+  document.getElementById('sr-kapak').textContent   = fmt(kapKagit);
+  document.getElementById('sr-icbaski').textContent = fmt(icBaski);
+  document.getElementById('sr-kapakbaski').textContent = fmt(kapBaski);
+  document.getElementById('sr-cilt').textContent    = fmt(cilt);
+  document.getElementById('sr-fin').textContent     = fmt(fin);
+  document.getElementById('sr-toplam').textContent  = fmt(toplam);
+  document.getElementById('sr-adet').textContent    = fmt(adetBasi) + ' / adet';
+  document.getElementById('sr-f40').textContent     = fmt(adetBasi / 0.6);
+  document.getElementById('sr-f50').textContent     = fmt(adetBasi / 0.5);
+  document.getElementById('sr-f60').textContent     = fmt(adetBasi / 0.4);
+
+  return { toplam, adetBasi };
+}
+
+function shamilKaydet() {
+  const kitap  = document.getElementById('s-kitap').value.trim();
+  const sayfa  = document.getElementById('s-sayfa').value;
+  const adet   = document.getElementById('s-adet').value;
+  if (!kitap || !sayfa || !adet) { toast('Kitap adı, sayfa ve adet zorunlu'); return; }
+
+  const sonuc = shamilHesapla();
+  if (!sonuc) { toast('Önce hesaplama yapın'); return; }
+
+  const kayit = {
+    id: Date.now(),
+    kitap, sayfa, adet,
+    toplam: Math.round(sonuc.toplam),
+    adetBasi: Math.round(sonuc.adetBasi),
+    f50: Math.round(sonuc.adetBasi / 0.5),
+    tarih: new Date().toLocaleDateString('tr-TR')
+  };
+  shamilGecmisi.unshift(kayit);
+  kaydetShamil();
+  renderShamilGecmisi();
+  toast('Maliyet kaydedildi ✓');
+}
+
+function renderShamilGecmisi() {
+  const tbody = document.getElementById('shamil-gecmis-tbody');
+  if (!tbody) return;
+  if (!shamilGecmisi.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--light-slate);font-style:italic;padding:20px;">Henüz hesaplama kaydedilmedi.</td></tr>';
+    return;
+  }
+  const fmt = v => '₺' + v.toLocaleString('tr-TR');
+  tbody.innerHTML = shamilGecmisi.map((s, i) => `<tr>
+    <td><strong>${s.kitap}</strong></td>
+    <td>${s.sayfa}</td>
+    <td>${s.adet}</td>
+    <td style="font-family:'IBM Plex Mono',monospace;">${fmt(s.toplam)}</td>
+    <td style="font-family:'IBM Plex Mono',monospace;color:var(--gold);">${fmt(s.adetBasi)}</td>
+    <td style="font-family:'IBM Plex Mono',monospace;color:var(--forest);">${fmt(s.f50)}</td>
+    <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">${s.tarih}</td>
+    <td><button class="btn" style="font-size:10px;padding:2px 7px;background:var(--rust);color:white;border:none;" onclick="shamilSil(${i})">Sil</button></td>
+  </tr>`).join('');
+}
+
+function shamilSil(i) { shamilGecmisi.splice(i,1); kaydetShamil(); renderShamilGecmisi(); toast('Silindi'); }
+function shamilGecmisiTemizle() { if(confirm('Tüm maliyet geçmişi silinsin mi?')) { shamilGecmisi.length=0; kaydetShamil(); renderShamilGecmisi(); } }
+
+
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(m => {
@@ -1907,6 +2445,9 @@ function toast(msg) {
 document.getElementById('s-projeler').textContent = projeler.length;
 renderTaslaklar();
 renderTahsilat();
+teklifKalemleriOlustur();
+renderTeklifGecmisi();
+renderShamilGecmisi();
 
 // ── VERİ AKTAR / YÜKLE ──
 function veriAktar() {
